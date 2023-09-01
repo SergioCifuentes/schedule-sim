@@ -9,3 +9,6 @@ SALONES = "salones.csv"
 
 #Path
 PATH="schedule-sim/resources/scripts/"
+
+#System Variables
+TIEMPO_PERIODO=60 #minutes

@@ -9,6 +9,7 @@ id_profesor, id_curso, fijo
 2, 2800, true
 2, 2810, true
 2, 2823, false
+2, 2799, false
 3, 2796, false
 3, 2800, false
 3, 2812, false
