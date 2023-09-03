@@ -3,8 +3,9 @@ import pandas as pd
 import pyomo.environ as pe
 import pyomo.gdp as pyogdp
 from pyomo.environ import value
-import matplotlib.pyplot as plt
-import matplotlib.cm as cm
+
+from gantt_drawer import Drawer
+
 
 from itertools import product
 from datetime import datetime
@@ -73,15 +74,7 @@ class Scheduler:
 
     def _get_maximum_capacity(self, id):
         df=self.df_salon.loc[self.df_salon['id'] == id]
-        return df['capacidad_maxima'].item()
-    
-    # def _generate_class_durations(self):
-    #     dict ={}
-    #     for index, row in self.df_asignacion.iterrows():
-    #         num_periods=(self.df_materias.loc[self.df_materias['id']==row['id_materia']])['no_periodos'].item()
-    #         for i in range(1, num_periods):
-    #             dict[row['id']]= i 
-    #     return dict
+        return df['capacidad_maxima'].item()   
 
     def _get_number_of_periods(self):
         start= self.df_disp_salon.min()['inicio']
@@ -91,41 +84,12 @@ class Scheduler:
         end_time= end_time - relativedelta(minutes=constant.TIEMPO_PERIODO)
        
         count=0
-        self.periods= []
+        self.periods= {}
         while start_time<=end_time:
             count+=1
-            self.periods.append([count, start_time])
+            self.periods[count]=start_time
             start_time= start_time + relativedelta(minutes=constant.TIEMPO_PERIODO)
         return count
-    
-    def _genereate_teacher_periods(self):
-        for period in self.periods:
-            pass
-    
-    # def _generate_disjunctions(self):
-    #     classes = self.df_asignacion["id"].to_list()
-    #     rooms = self.df_salon["id"].to_list()
-    #     teachers =self.df_profesores["id"].to_list()
-    #     disjunctions = []
-    #     for (class1, class2, room, teacher1, teacher2) in product(classes, classes, rooms, teachers, teachers):
-    #         if (class1 != class2) and (teacher1!=teacher2) and (class1, class2, room, teacher1, teacher2) not in disjunctions:
-    #             disjunctions.append((class1, class2, room, teacher1, teacher2))
-
-    #     return disjunctions
-
-    # def _generate_room_disjunctions(self, max_periods):
-    #     classes = self.df_asignacion["id"].to_list()
-    #     periods = self.period_range
-    #     rooms = self.df_salon["id"].to_list()
-    #     disjunctions = []
-    #     disjunctions2 = []
-    #     for (class1, class2, period1, period2) in product(classes, classes, periods, periods):
-    #         if (class1 != class2) and (abs(period1 - period2) < max_periods) and (class1, class2, period1, period2) not in disjunctions:
-    #             for room in rooms:
-    #                 print("help")
-    #                 disjunctions2.append((class1, class2, period1, period2,room))
-    #             disjunctions.append((class1, class2, period1, period2))
-    #     return disjunctions2
     
     def _generate_room_disjunctions(self):
         classes = self.df_asignacion["id"].to_list()
@@ -142,14 +106,92 @@ class Scheduler:
         mas_period = max(periods)
         disjunctions = []
         for index, row in self.df_asignacion.iterrows():
-            num_periods=(self.df_materias.loc[self.df_materias['id']==row['id_materia']])['no_periodos'].item()
+            id =row['id']
+            num_periods=self.class_num_periods[id]
             for i in range(1, num_periods):
                 for (period, room) in product(periods, rooms):
-                    id =row['id']
+                    
                     if (period+i<=mas_period) and (id,i, period, room) not in disjunctions:
                         disjunctions.append((id, i, period, room))
         return disjunctions
     
+    def _generate_classroom_periods(self):
+        periods = self.period_range
+        rooms = self.df_salon["id"].to_list()
+        disjunctions = []
+        for index, row in self.df_asignacion.iterrows():
+            id =row['id']
+            num_periods=self.class_num_periods[id]
+            for i in range(0, num_periods):
+                for (period, room) in product(periods, rooms):
+                    if (id,i, period, room) not in disjunctions:
+                        disjunctions.append((id, i, period, room))
+        return disjunctions
+    
+    def _generate_room_periods(self):
+        periods = self.period_range
+        disjunctions = {}
+        for index, row in self.df_disp_salon.iterrows():
+            start= row['inicio']
+            start_time = datetime.strptime(start.replace('"', ''), '%H:%M')
+            end= row['fin']
+            end_time = datetime.strptime(end.replace('"', ''), '%H:%M')
+            for period in periods:
+                if(start_time<=self.periods[period] and (self.periods[period]+relativedelta(minutes=constant.TIEMPO_PERIODO))<=end_time):
+                    disjunctions[row['id_salon'],period]=1
+                elif (row['id_salon'],period) not in disjunctions:
+                    disjunctions[row['id_salon'],period]=0
+            for i in range(self.num_periodos+1, self.num_periodos+self.max_periods):
+                disjunctions[row['id_salon'],i]=0
+        return disjunctions
+    
+    def _generate_same_semester(self):
+        classes = self.df_asignacion["id"].to_list()
+        periods = self.period_range
+        dis_class=[]
+        same_semester = []
+        self.same_semester_comun = []
+        for (class1, class2) in product(classes,classes):
+            if(class1!=class2):
+                if (self.class_semester[class1] == self.class_semester[class2]):
+                    aux_comun=False
+                    if(self.class_career[class1] == self.class_career[class2]):
+                        if(self.class_section[class1]!=self.class_section[class2]):
+                            continue
+                    elif (self.class_career[class1] == "Comun" or self.class_career[class2] == "Comun"):
+                        aux_comun=True
+                    else:
+                        continue
+                    num_period = self.class_num_periods[class1]
+                    if (class2, class1) in dis_class and num_period<=1:
+                        continue
+                    dis_class.append((class1,class2))
+                    for i in range(0, num_period):
+                        for j in  range(1, self.num_periodos -i+1):
+                            if aux_comun:
+                                self.same_semester_comun.append((class1,class2,i,j))
+                            else:
+                                same_semester.append((class1,class2,i,j))
+        return same_semester
+
+    def generate_class_info(self):
+        self.class_num_periods={}
+        self.class_semester={}
+        self.class_career={}
+        self.class_mandatory=[]
+        self.class_section={}
+        for index, row in self.df_asignacion.iterrows():
+            id= row['id']
+            materia=self.df_materias.loc[self.df_materias['id']==row['id_materia']]
+            self.class_num_periods[id]=materia['no_periodos'].item()
+            self.class_semester[id]=materia['semestre'].item()
+            self.class_career[id]=materia['carrera'].item()
+            if(materia['obli'].item()==True):
+                self.class_mandatory.append(id)
+            self.class_section[id]=row['sec']
+
+
+
     def create_model(self):
         model = pe.ConcreteModel()
         # List of classes IDs
@@ -158,39 +200,34 @@ class Scheduler:
         model.TEACHERS = pe.Set(initialize=self.df_profesores["id"].tolist())
         # List of rooms IDs
         model.ROOMS = pe.Set(initialize=self.df_salon["id"].tolist())
-
-        num_periodos = self._get_number_of_periods()
-        self.period_range=range(1,num_periodos)
+        self.generate_class_info()
+        self.num_periodos = self._get_number_of_periods()
+        self.period_range=range(1,self.num_periodos+1)
+        self.max_periods= self._get_max_period_num()
         model.PERIODS = pe.Set(initialize=self.period_range)
 
         model.ASSIGNMENTS= pe.Set(initialize=model.CLASSES* model.PERIODS, dimen=2)
-        # List of class with rooms - all possible combinations of classes and rooms (classID, roomID)
-        #model.CLASSROOMS = pe.Set(initialize=model.CLASSES * model.ROOMS, dimen=2)
-        # The capacity of each room
+
         model.ROOM_MAX_CAPACITY = pe.Param(model.ROOMS, initialize=self._generate_room_maximum())
         
         model.CLASS_STUDENTS = pe.Param(model.CLASSES, initialize=self._generate_class_students())
 
         model.CLASS_DURATION = pe.Set(initialize=self._generate_class_durations(), dimen=4)
-        
-        #model.TEACHER_SCHEDULE = pe.Param(model.TEACHERS, initialize=self._genereate_teacher_periods())
+        model.CLASS_DURATION_TWO = pe.Set(initialize=self._generate_classroom_periods(), dimen=4)
         
         model.DISJUNCTIONS_ROOM_CAPACITY = pe.Set(initialize=model.CLASSES*model.PERIODS*model.ROOMS, dimen=3)
+        model.ALL_PERIODS = pe.Set(initialize=range(1,self.num_periodos+self.max_periods))
+        model.ROOM_PERIOD = pe.Set(initialize=model.ROOMS*model.ALL_PERIODS)
+        model.PARAM_ROOM_PERIOD = pe.Param(model.ROOM_PERIOD,initialize=self._generate_room_periods())
+        model.DISJUNCTIONS_ROOM = pe.Set(initialize=model.PERIODS*model.ROOMS, dimen=2)
 
-        
+        model.DISJUNCTIONS_TEACHER = pe.Set(initialize=model.PERIODS*model.TEACHERS, dimen=2)
 
-        
-        # List of class with rooms and teachers- all possible combinations of classes and rooms (classID, roomID, techerID)
-        #model.ASSIGNMENTS= pe.Set(initialize=self._generate_class_room_assignment(model) * model.TEACHERS, dimen=3)
+        model.DISJUNCTIONS_SAME_SEMESTER = pe.Set(initialize=self._generate_same_semester(), dimen=4)
 
-        #model.ASSIGNMENTS= pe.Set(initialize=model.CLASSES* model.ROOMS * model.TEACHERS, dimen=3)
-
-        
-
-        max_periods= self._get_max_period_num()
+        model.DISJUNCTIONS_MANDATORY_CLASSES = pe.Set(initialize=self.class_mandatory, dimen=1)
 
         model.M = pe.Param(initialize=1e3*1400)  # big M
-
         
         #Decision Variables
         model.PERIOD_ASSIGNED = pe.Var(model.ASSIGNMENTS, domain=pe.Binary)
@@ -198,74 +235,63 @@ class Scheduler:
         model.TEACHER_ASSIGNED = pe.Var(model.ASSIGNMENTS*model.TEACHERS, domain=pe.Binary)
         
         model.ROOM_ASSIGNED = pe.Var(model.ASSIGNMENTS*model.ROOMS, domain=pe.Binary)
-        # model.ROOM_ASSIGNED = pe.Var(model.ASSIGNMENTS, domain=pe.IntegerSet(set(self.df_profesores["id"])))
-        model.DISJUNCTIONS_ROOM = pe.Set(initialize=model.PERIODS*model.ROOMS, dimen=2)
 
-       
-
-        
         #Objective
         def objective_function(model):
             return sum([model.PERIOD_ASSIGNED[clasS, period] for clasS in model.CLASSES for period in model.PERIODS])
         model.OBJECTIVE = pe.Objective(rule=objective_function, sense=pe.maximize)
-
         #Constraints
-
-        # Constraint 3: Cases can be assigned to a maximum of one session
-
 
         def period_assignment(model, clasS):
             return sum([model.PERIOD_ASSIGNED[(clasS, period)] for period in model.PERIODS]) <= 1
         model.PERIOD_ASSIGNMENT = pe.Constraint(model.CLASSES, rule=period_assignment)
 
-        def room_per_class(model, clasS, period):
-            return model.PERIOD_ASSIGNED[(clasS, period)] == sum([model.ROOM_ASSIGNED[(clasS, period, room)] for room in model.ROOMS])
-        model.ROOM_PER_CLASS = pe.Constraint(model.ASSIGNMENTS, rule=room_per_class)
+        def same_semester(model, class1, class2, num_period, period):
+            return model.PERIOD_ASSIGNED[(class1, period)] + model.PERIOD_ASSIGNED[(class2, period+num_period)] <=1
+        model.SAME_SEMESTER = pe.Constraint(model.DISJUNCTIONS_SAME_SEMESTER, rule=same_semester)
+
+        def mandatory_classes(model, clasS):
+            return sum([model.PERIOD_ASSIGNED[(clasS, period)] for period in model.PERIODS]) >=1
+        model.MANDATORY_CLASSES = pe.Constraint(model.DISJUNCTIONS_MANDATORY_CLASSES, rule=mandatory_classes)
+
 
         def teacher_per_class(model, clasS, period):
             return model.PERIOD_ASSIGNED[(clasS, period)] == sum([model.TEACHER_ASSIGNED[(clasS, period, teachers)] for teachers in model.TEACHERS])
         model.TEACHER_PER_CLASS = pe.Constraint(model.ASSIGNMENTS, rule=teacher_per_class)
 
+        #ROOM CONSTRAINTS
 
-        def room_capacity(model, clasS, period, room):
-            return model.CLASS_STUDENTS[clasS] <= model.ROOM_MAX_CAPACITY[room] + ((1 - model.ROOM_ASSIGNED[clasS, period,room])*model.M)
+        def room_per_class(model, clasS, period):
+            return model.PERIOD_ASSIGNED[(clasS, period)] == sum([model.ROOM_ASSIGNED[(clasS, period, room)] for room in model.ROOMS])
+        model.ROOM_PER_CLASS = pe.Constraint(model.ASSIGNMENTS, rule=room_per_class)
 
-        model.ROOM_CAPACITY_RULE = pe.Constraint(model.DISJUNCTIONS_ROOM_CAPACITY, rule=room_capacity)
+        
+        def no_teacher_overlap(model, period, teacher ):
+            return sum([model.TEACHER_ASSIGNED[( class1, period, teacher)] for class1 in model.CLASSES]) <=1
+        model.TEACHER_OVERLAP = pe.Constraint(model.DISJUNCTIONS_TEACHER, rule=no_teacher_overlap)
         
         def no_room_overlap(model, period, room ):
             return sum([model.ROOM_ASSIGNED[( class1, period, room)] for class1 in model.CLASSES]) <=1
-
-        # model.DISJUNCTIONS_ROOM_RULE = pyogdp.Disjunction(model.DISJUNCTIONS_ROOM, rule=no_room_overlap)        
-        # def no_room_overlap(model, class1, class2, period1, period2, room):
-        #     return [period1 +model.CLASS_DURATION[class1] <= period2 + \
-        #             ((2 - model.ROOM_ASSIGNED[class1, period1,room] - model.ROOM_ASSIGNED[class2, period2,room])*model.M),
-        #             period2 +model.CLASS_DURATION[class2] <= period1 + \
-        #             ((2 - model.ROOM_ASSIGNED[class1, period1,room] - model.ROOM_ASSIGNED[class2, period2,room])*model.M)]
-
         model.DISJUNCTIONS_ROOM_RULE = pe.Constraint(model.DISJUNCTIONS_ROOM, rule=no_room_overlap)
 
+        def room_capacity(model, clasS, period, room):
+            return model.CLASS_STUDENTS[clasS] <= model.ROOM_MAX_CAPACITY[room] + ((1 - model.ROOM_ASSIGNED[clasS, period,room])*model.M)
+        model.ROOM_CAPACITY_RULE = pe.Constraint(model.DISJUNCTIONS_ROOM_CAPACITY, rule=room_capacity)
 
         def no_room_overlap_period(model, clasS, num_period, period, room ):
             return sum([model.ROOM_ASSIGNED[( class1, period+num_period, room)] for class1 in model.CLASSES]) <= 0 + ((1 - model.ROOM_ASSIGNED[clasS,period,room])*model.M)
-        model.DISJUNCTIONS_PERIOD_ROOM_RULE = pe.Constraint(model.CLASS_DURATION, rule=no_room_overlap_period)
+        model.OVERLAP_PERIOD_ROOM_RULE = pe.Constraint(model.CLASS_DURATION, rule=no_room_overlap_period)
+
+        def no_room_schedule(model, clasS, num_period, period, room ):
+            return model.ROOM_ASSIGNED[( clasS, period, room)]  <= model.PARAM_ROOM_PERIOD[room,period+num_period]
+        model.DISJUNCTIONS_PERIOD_ROOM_RULE = pe.Constraint(model.CLASS_DURATION_TWO, rule=no_room_schedule)
+
+        #TEACHER CONSTRAINTS
 
 
 
-        # def no_teacher_overlap(model, class1, class2, period1, period2):
-        #     return model.TEACHER_ASSIGNED[class1, period1] <= model.TEACHER_ASSIGNED[class2, period2] + \
-        #             ((2 - model.PERIOD_ASSIGNED[class1, period1] - model.PERIOD_ASSIGNED[class2, period2])*model.M)
 
-        # model.TEACHER_RULE = pe.Constraint(model.DISJUNCTIONS_ROOM, rule=no_teacher_overlap)
-
-        # def no_room_overlap(model, class1, class2, room, teacher1, teacher2):
-        #     return [model.CLASS_START_TIME[class1, room, teacher1] + model.CLASS_DURATION[class1] <= model.CLASS_START_TIME[class2, room, teacher2] + \
-        #             ((2 - model.CLASS_ASSIGNED[class1, room, teacher1] - model.CLASS_ASSIGNED[class2, room, teacher2])*model.M),
-        #             model.CLASS_START_TIME[class2, room, teacher2] + model.CLASS_DURATION[class2] <= model.CLASS_START_TIME[class1, room, teacher1] + \
-        #             ((2 - model.CLASS_ASSIGNED[class1, room, teacher1] - model.CLASS_ASSIGNED[class2, room, teacher2])*model.M)]
-
-        # model.DISJUNCTIONS_RULE = pyogdp.Disjunction(model.DISJUNCTIONS, rule=no_room_overlap)
-
-        pe.TransformationFactory("gdp.bigm").apply_to(model)
+        # pe.TransformationFactory("gdp.bigm").apply_to(model)
 
         return model
 
@@ -313,54 +339,8 @@ class Scheduler:
         print("Number of constraints = {}".format(solver_results["Problem"].__getitem__(0)["Number of constraints"]))
         #self.model.SESSION_ASSIGNED.pprint()
         # print(self.df_times[self.df_times["Assignment"] == 1].to_string())
-        self.draw_gantt()
-
-    def draw_gantt(self):
-
-        df = self.df_times
-        classes = sorted(list(df['Class'].unique()))
-        rooms = sorted(list(df['Room'].unique()))
-        teacher = sorted(list(df['Teacher'].unique()))
-
-        bar_style = {'alpha': 1.0, 'lw': 25, 'solid_capstyle': 'butt',}
-        text_style = {'color': 'white', 'weight': 'bold', 'ha': 'center', 'va': 'center', 'size': '6'}
-        colors = cm.Dark2.colors
-
-        df.sort_values(by=['Class', 'Room','Teacher'])
-        df.set_index(['Class', 'Room','Teacher'], inplace=True)
-        fig, ax = plt.subplots(1,1)
-        for c_ix, c in enumerate(classes, 1):
-            for s_ix, s in enumerate(rooms, 1):
-                for t_ix, t in enumerate(teacher, 1):
-                    if (c, s,t) in df.index:
-                        xs = df.loc[(c, s,t), 'Period']
-                        idC=self._get_class_by_assignment(c)
-                        sec=self._get_seccion_by_assignment(c)
-                        xf = df.loc[(c, s,t), 'Period'] + \
-                            self.df_materias[self.df_materias["id"] == idC]["no_periodos"]
-                        ax.plot([s]* 2,[xs, xf] , c=colors[self._get_color(idC)], **bar_style)
-                        ax.text(s,(xs + xf) / 2, str(idC) +"\n\'"+sec+"\'\n"+ str(t), **text_style)
-
-        ax.set_title('Horario')
-        ax.set_xlabel('Rooms')
-        ax.set_ylabel('Periodo')
-        ax.grid(True)
-
-        fig.tight_layout()
-        plt.show()
-    def _get_class_by_assignment(self, id):
-        return self.df_asignacion[self.df_asignacion["id"] == id]["id_materia"].item()
-    def _get_seccion_by_assignment(self, id):
-        return self.df_asignacion[self.df_asignacion["id"] == id]["sec"].item()
-
-    def _get_color(self, id):
-        career=(self.df_materias.loc[self.df_materias['id']==id])['carrera'].item()
-        if(career=="Comun"):
-            return 0
-        if(career=="Sistemas"):
-            return 1
-        if(career=="Civil"):
-            return 3
+        drawer = Drawer(self.df_times, self.df_asignacion, self.df_materias, self.periods,self.class_num_periods    )
+        drawer.draw()
 
 if __name__ == "__main__":
     cbc_path = "C:\\Users\\sergi\\Documents\\Coding\\Python\\solvers\\Cbc-2.7.5-win64-intel11.1\\bin\\cbc.exe"
@@ -368,6 +348,6 @@ if __name__ == "__main__":
     cbc_name = "cbc"
     ipopt_name = "ipopt"
 
-    options = {"seconds": 300}
+    options = {"seconds": 100}
     scheduler = Scheduler()
     scheduler.solve(solver_name=cbc_name, solver_path=cbc_path, options=options)
