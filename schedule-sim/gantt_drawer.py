@@ -42,7 +42,7 @@ class Drawer:
                         # xs=xs.time()
                         xf = xs +self.numperiods[c]
                         ax.plot([s]* 2,[xs, xf] , c=colors[self._get_color(idC)], **bar_style)
-                        ax.text(s,(xs + xf) / 2, str(idC) +"\n\'"+sec+"\'\n"+ str(t), **text_style)
+                        ax.text(s,(xs + xf) / 2, str(idC) +"\n\'"+sec+"\'\n"+ str(int(t)), **text_style)
 
         ax.set_title('Horario')
         ax.set_xlabel('Rooms')
