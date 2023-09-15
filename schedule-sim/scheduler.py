@@ -6,9 +6,16 @@ from pyomo.environ import value
 from gantt_drawer import Drawer
 from input_controller import InputController
 from set_generator import SetGenerator
+from json_builder import convert_to_Json
+import pyutilib
 class Scheduler:
     
-    def __init__(self, input_controller):
+    def __init__(self):
+        self.input_controller =None
+        self.is_solved = False
+        
+        #self.model = self.create_model()      
+    def load_input_controller(self,input_controller):
         self.input_controller = input_controller
         self.df_asignacion = input_controller.df_asignacion
         self.df_disp_prof = input_controller.df_disp_prof
@@ -19,7 +26,10 @@ class Scheduler:
         self.df_salon = input_controller.df_salon
         self.set_generator= SetGenerator(self.df_salon,self.df_profesores,self.df_disp_salon,
                                          self.df_asignacion, self.df_disp_prof)
-        self.model = self.create_model()      
+        self.model = self.create_model() 
+
+    def get_input_controller(self):
+        return self.input_controller
 
     def _generate_room_maximum(self):  
         return pd.Series(self.df_salon["capacidad_maxima"].values, index=self.df_salon["id"]).to_dict()
@@ -208,7 +218,8 @@ class Scheduler:
         return model
 
     def solve(self, solver_name, options=None, solver_path=None, local=True):
-
+        print("Starting solver")
+        pyutilib.subprocess.GlobalData.DEFINE_SIGNAL_HANDLERS_DEFAULT = False
         if solver_path is not None:
             solver = pe.SolverFactory(solver_name, executable=solver_path)
         else:
@@ -225,6 +236,7 @@ class Scheduler:
             solver_manager = pe.SolverManagerFactory("neos")
             solver_results = solver_manager.solve(self.model, opt=solver)
         results=[]
+        self.dict={}
         for (clasS, period, room) in self.model.ROOM_ASSIGNED:
             if value(self.model.ROOM_ASSIGNED[clasS, period,room]) == 1:
                 results.append({"Class": clasS,
@@ -235,22 +247,30 @@ class Scheduler:
             if value(self.model.TEACHER_ASSIGNED[clasS, period,teacher]) ==1:
                 self.df_times.loc[self.df_times['Class'] == clasS, 'Teacher']=teacher
         all_classes = self.model.CLASSES.value_list
-        classes_assigned = []
+        self.classes_assigned = []
         for (clasS, period) in self.model.PERIOD_ASSIGNED:
 
             if value(self.model.PERIOD_ASSIGNED[clasS, period]) == 1:
-                classes_assigned.append(clasS)
+                self.classes_assigned.append(clasS)
 
-        classes_missed = list(set(all_classes).difference(classes_assigned))
-        print("Number of cases assigned = {} out of {}:".format(len(classes_assigned), len(all_classes)))
-        print("Cases assigned: ", classes_assigned)
-        print("Number of cases missed = {} out of {}:".format(len(classes_missed), len(all_classes)))
-        print("Cases missed: ", classes_missed)
-        print("Number of constraints = {}".format(solver_results["Problem"].__getitem__(0)["Number of constraints"]))
-        #self.model.SESSION_ASSIGNED.pprint()
-        # print(self.df_times[self.df_times["Assignment"] == 1].to_string())
-        drawer = Drawer(self.df_times, self.df_asignacion, self.df_materias, self.periods,self.class_num_periods    )
+        self.classes_missed = list(set(all_classes).difference(self.classes_assigned))
+        self.is_solved=True
+        print("Finish solver")
+        # print("Number of classes assigned = {} out of {}:".format(len(self.classes_assigned), len(all_classes)))
+        # print("Classes assigned: ", self.classes_assigned)
+        # print("Number of Classes missed = {} out of {}:".format(len(self.classes_missed ), len(all_classes)))
+        # print("Classes missed: ", self.classes_missed )
+        # print("Number of constraints = {}".format(solver_results["Problem"].__getitem__(0)["Number of constraints"]))
+        
+    
+    def draw(self):
+        drawer = Drawer(self.df_times, self.df_asignacion, self.df_materias, self.periods,self.class_num_periods)
         drawer.draw()
+
+    def get_results_json(self):
+        return convert_to_Json(self.df_times, self.df_asignacion, self.df_materias, self.df_profesores,
+                     self.df_salon, self.periods, len(self.classes_assigned), len(self.classes_missed ))
+
 
 if __name__ == "__main__":
     cbc_path = "C:\\Users\\sergi\\Documents\\Coding\\Python\\solvers\\Cbc-2.7.5-win64-intel11.1\\bin\\cbc.exe"
@@ -258,6 +278,10 @@ if __name__ == "__main__":
     cbc_name = "cbc"
     ipopt_name = "ipopt"
     input_controller = InputController()
-    options = {"seconds": 100}
-    scheduler = Scheduler(input_controller)
+    input_controller.load_data()
+
+    options = {"seconds": 200}
+    scheduler = Scheduler()
+    scheduler.load_input_controller(input_controller)
     scheduler.solve(solver_name=cbc_name, solver_path=cbc_path, options=options)
+    scheduler.draw()
