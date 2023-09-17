@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify, Response
+from flask import Flask, render_template, request, jsonify, Response, send_file
 app = Flask(__name__)
 from input_controller import InputController
 from scheduler import Scheduler
@@ -25,7 +25,6 @@ if __name__ == '__main__':
 @app.route("/load_data", methods=['POST'])
 def load_data():
     req_data = request.get_json()
-    print(req_data)
     folder_path = req_data['folder_path'] 
     
     if(input_controller.load_data(folder_path)):
@@ -77,11 +76,9 @@ def get_results():
             'error': 'Not Ready Yet'
         })    
     else:
-
         json1=scheduler.get_results_json()
-
         id = db.insertResults(json1)
-
+        scheduler.draw(id)
         return jsonify({
             'status': '200',
             'id': id
@@ -109,6 +106,25 @@ def reset_model():
             'msg': 'Model reset'
         })
 
+@app.route("/teachers", methods=['POST'])
+def post_teachers():
+    req_data = request.get_json()
+    print(req_data)
+    if hasattr(input_controller, "df_profesores") and 'name' in req_data\
+    and 'career' in req_data:
+        id = db.insertTeacher(req_data)
+        input_controller.insert_teacher(id,req_data)
+        return jsonify({
+            'status': '200',
+            'id': id
+        })
+    else:
+        return jsonify({
+            'status': '400',
+            'res': 'failure',
+            'error': 'teachers data not loaded'
+        })
+
 @app.route("/teachers", methods=['GET'])
 def get_teachers():
     if hasattr(input_controller, "df_profesores"):
@@ -119,17 +135,25 @@ def get_teachers():
             'res': 'failure',
             'error': 'teachers data not loaded'
         })
-    
-@app.route("/load_info", methods=['GET'])
-def get_load_info():
-    if hasattr(input_controller, "df_profesores"):
-        return json.dumps( input_controller.get_load_info())
+
+
+@app.route("/teachers/<id>", methods=['DELETE'])
+def delete_teachers(id):
+    if hasattr(input_controller, "df_profesores") and input_controller.teacher_exists(id):
+        input_controller.delete_teacher(id)
+        db.deleteTeacher(id)
+        return jsonify({
+            'res':'success',
+            'status': '200',
+            'msg': 'Teacher deleted'
+        })
     else:
         return jsonify({
             'status': '400',
             'res': 'failure',
             'error': 'teachers data not loaded'
         })
+
 
     
 @app.route("/classes", methods=['GET'])
@@ -143,9 +167,26 @@ def get_classes():
             'error': 'class data not loaded'
         })
     
+@app.route("/classes/<id>", methods=['DELETE'])
+def delete_classes(id):
+    if hasattr(input_controller, "df_materias") and input_controller.class_exists(id):
+        input_controller.delete_class(id)
+        db.deleteClass(id)
+        return jsonify({
+            'res':'success',
+            'status': '200',
+            'msg': 'Class deleted'
+        })
+    else:
+        return jsonify({
+            'status': '400',
+            'res': 'failure',
+            'error': 'Class data not loaded'
+        })
+    
 @app.route("/classrooms", methods=['GET'])
 def get_classrooms():
-    if hasattr(input_controller, "df_salon"):
+    if hasattr(input_controller, "df_materias"):
         return Response(input_controller.df_salon.to_json(orient="records"), mimetype='application/json')
     else:
         return jsonify({
@@ -153,6 +194,52 @@ def get_classrooms():
             'res': 'failure',
             'error': 'classroom data not loaded'
         })
+    
+@app.route("/classrooms/<id>", methods=['DELETE'])
+def delete_classrooms(id):
+    if hasattr(input_controller, "df_salon") and input_controller.classroom_exists(id):
+        input_controller.delete_classroom(id)
+        db.deleteClassroom(id)
+        return jsonify({
+            'res':'success',
+            'status': '200',
+            'msg': 'Classroom deleted'
+        })
+    else:
+        return jsonify({
+            'status': '400',
+            'res': 'failure',
+            'error': 'Classroom data not loaded'
+        })
+    
+@app.route("/load_info", methods=['GET'])
+def get_load_info():
+    if hasattr(input_controller, "df_profesores"):
+        if(input_controller.changed):
+            def long_running_task(**kwargs):
+                print("loading")
+                scheduler = Scheduler()
+                scheduler.load_input_controller(input_controller)
+                input_controller.changed=False
+            thread = threading.Thread(target=long_running_task)
+            thread.start()
+        return json.dumps( input_controller.get_load_info())
+    else:
+        return jsonify({
+            'status': '400',
+            'res': 'failure',
+            'error': 'teachers data not loaded'
+        })
+    
+@app.route('/get_image/<id>', methods=['GET'])
+def get_image(id):
+    filename='../docs/Schedule'+id+'.png'
 
+    return send_file(filename, mimetype='image/gif')
+
+@app.route('/get_sim_history', methods=['GET'])
+def get_history():
+    
+    return json.dumps(db.getSimHistory())
 
         

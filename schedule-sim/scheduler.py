@@ -96,6 +96,8 @@ class Scheduler:
         self._generate_teacher_info()
         self.periods={}
         self.num_periodos = self.set_generator.get_number_of_periods(self.periods)
+        self.rooms={}
+        self.set_generator.get_rooms(self.rooms)
         self.period_range=range(1,self.num_periodos+1)
         self.max_periods= self._get_max_period_num()
 
@@ -263,9 +265,9 @@ class Scheduler:
         # print("Number of constraints = {}".format(solver_results["Problem"].__getitem__(0)["Number of constraints"]))
         
     
-    def draw(self):
-        drawer = Drawer(self.df_times, self.df_asignacion, self.df_materias, self.periods,self.class_num_periods)
-        drawer.draw()
+    def draw(self, id):
+        drawer = Drawer(self.df_times, self.df_asignacion, self.df_materias, self.periods,self.class_num_periods, self.rooms, self.df_profesores)
+        drawer.draw(id)
 
     def get_results_json(self):
         return convert_to_Json(self.df_times, self.df_asignacion, self.df_materias, self.df_profesores,
@@ -278,10 +280,11 @@ if __name__ == "__main__":
     cbc_name = "cbc"
     ipopt_name = "ipopt"
     input_controller = InputController()
-    input_controller.load_data()
-
-    options = {"seconds": 200}
+    path="C:\\Users\\sergi\\Documents\\Coding\\Python\\schedule-sim\\schedule-sim\\resources\\scripts\\2\\"
+    input_controller.load_data(path)
+    
+    options = {"seconds": 100}
     scheduler = Scheduler()
     scheduler.load_input_controller(input_controller)
     scheduler.solve(solver_name=cbc_name, solver_path=cbc_path, options=options)
-    scheduler.draw()
+    scheduler.draw(5)

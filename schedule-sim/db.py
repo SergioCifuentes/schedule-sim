@@ -52,5 +52,52 @@ class DB:
         # if (not result.exists()):
         #     return False
         dic = [dict(r) for r in result.mappings().all()]
-        print(dic[0])
         return json.dumps(dic[0], indent=4, sort_keys=True, default=str)
+    
+    def insertTeacher(self, data):
+        connection = self.engine.raw_connection()
+        cursor = connection.cursor()
+        cursor.execute(f'''INSERT INTO profesor(nombre, carrera) VALUES( \'%s\', \'%s\')'''%(data['name'], data['career']))
+        cursor.execute(f'''SELECT MAX(id) FROM profesor''')
+        connection.commit()
+        connection.close()
+        result=cursor.fetchone()
+        return result[0]
+
+    
+    def deleteTeacher(self, id):
+        connection = self.engine.raw_connection()
+        cursor = connection.cursor()
+        cursor.execute(f'''DELETE FROM profesor WHERE id = ('{id}');''')
+        cursor.execute(f'''DELETE FROM prof_materia WHERE id_profesor = ('{id}');''')
+        cursor.execute(f'''DELETE FROM disp_profesor WHERE id_profesor = ('{id}');''')
+        
+        connection.commit()
+
+    def deleteClass(self, id):
+        connection = self.engine.raw_connection()
+        cursor = connection.cursor()
+        cursor.execute(f'''DELETE FROM materia WHERE id = ('{id}');''')
+        cursor.execute(f'''DELETE FROM prof_materia WHERE id_curso = ('{id}');''')
+        cursor.execute(f'''DELETE FROM asignacion WHERE id_materia = ('{id}');''')
+        
+        connection.commit()
+
+    def deleteClassroom(self, id):
+        connection = self.engine.raw_connection()
+        cursor = connection.cursor()
+        cursor.execute(f'''DELETE FROM salon WHERE id = ('{id}');''')
+        cursor.execute(f'''DELETE FROM disp_salon WHERE id_salon = ('{id}');''')
+        connection.commit()
+
+    def getSimHistory(self):
+        array=[]
+        connection = self.engine.raw_connection()
+        cursor = connection.cursor()
+        cursor.execute('''SELECT * from results''')
+        results= cursor.fetchall()
+        for result in results:
+            dictJ = result[2]
+            array.append({"id":result[0], "date":str(result[1]),
+                          "assigned":dictJ['assigned'], "notAssigned":dictJ['notAssigned']})
+        return array

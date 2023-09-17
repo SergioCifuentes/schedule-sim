@@ -39,6 +39,11 @@ class SetGenerator:
         self.num_periodos=count
         return count
     
+    def get_rooms(self, rooms):
+        for index, row in self.df_salon.iterrows():
+            rooms[row['id']]=row['nombre']
+        
+    
     def generate_class_durations(self):
         
         rooms = self.df_salon["id"].to_list()
