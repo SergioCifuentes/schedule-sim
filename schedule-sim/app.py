@@ -109,11 +109,11 @@ def reset_model():
 @app.route("/teachers", methods=['POST'])
 def post_teachers():
     req_data = request.get_json()
-    print(req_data)
-    if hasattr(input_controller, "df_profesores") and 'name' in req_data\
+    if 'name' in req_data\
     and 'career' in req_data:
         id = db.insertTeacher(req_data)
-        input_controller.insert_teacher(id,req_data)
+        if hasattr(input_controller, "df_profesores"):
+            input_controller.insert_teacher(id,req_data)
         return jsonify({
             'status': '200',
             'id': id
@@ -123,6 +123,45 @@ def post_teachers():
             'status': '400',
             'res': 'failure',
             'error': 'teachers data not loaded'
+        })
+@app.route("/teachers/schedule", methods=['POST'])
+def post_teachers_schedule():
+    req_data = request.get_json()
+    print(req_data)
+    if 'start' in req_data and 'id' in req_data\
+    and 'end' in req_data:
+        id = db.insertTeacherSchedule(req_data)
+        if hasattr(input_controller, "df_disp_prof"):
+            input_controller.insert_teacher_schedule(req_data)
+        return jsonify({
+            'status': '200',
+            'id': req_data['id']
+        })
+    else:
+        return jsonify({
+            'status': '400',
+            'res': 'failure',
+            'error': 'teachers schedule data not loaded'
+        })
+    
+@app.route("/teachers/class", methods=['POST'])
+def post_teachers_class():
+    req_data = request.get_json()
+    print(req_data)
+    if 'class_id' in req_data and 'id' in req_data\
+    and 'mandatory' in req_data:
+        id = db.insertTeacherClass(req_data)
+        if hasattr(input_controller, "df_prof_materia"):
+            input_controller.insert_teacher_class(req_data)
+        return jsonify({
+            'status': '200',
+            'id': req_data['id']
+        })
+    else:
+        return jsonify({
+            'status': '400',
+            'res': 'failure',
+            'error': 'teachers class data not loaded'
         })
 
 @app.route("/teachers", methods=['GET'])
@@ -154,6 +193,17 @@ def delete_teachers(id):
             'error': 'teachers data not loaded'
         })
 
+@app.route("/teachers/<id>", methods=['GET'])
+def get_teacher(id):
+    if hasattr(input_controller, "df_profesores") and input_controller.teacher_exists(id):
+        result= input_controller.get_teacher(int(id))
+        return result
+    else:
+        return jsonify({
+            'status': '400',
+            'res': 'failure',
+            'error': 'teachers data not loaded'
+        })
 
     
 @app.route("/classes", methods=['GET'])
@@ -165,6 +215,55 @@ def get_classes():
             'status': '400',
             'res': 'failure',
             'error': 'class data not loaded'
+        })
+    
+@app.route("/classes/<id>", methods=['GET'])
+def get_class(id):
+    if hasattr(input_controller, "df_materias") and input_controller.class_exists(id):
+        result= input_controller.get_class(int(id))
+        return result
+    else:
+        return jsonify({
+            'status': '400',
+            'res': 'failure',
+            'error': 'class data not loaded'
+        })
+    
+@app.route("/classes", methods=['POST'])
+def post_class():
+    req_data = request.get_json()
+    if 'name' in req_data and 'periods' in req_data and 'id' in req_data\
+    and 'semester' in req_data and 'mandatory' in req_data and 'career' in req_data:
+        id = db.insertClass(req_data)
+        if hasattr(input_controller, "df_materias"):
+            input_controller.insert_class(id,req_data)
+        return jsonify({
+            'status': '200',
+            'id': id
+        })
+    else:
+        return jsonify({
+            'status': '400',
+            'res': 'failure',
+            'error': 'classroom data not loaded'
+        })
+    
+@app.route("/classes/assignment", methods=['POST'])
+def post_class_assignment():
+    req_data = request.get_json()
+    if 'id' in req_data and 'section' in req_data and 'students' in req_data:
+        id=db.insertClassAsignment(req_data)
+        if hasattr(input_controller, "df_asignacion"):
+            input_controller.insert_class_asignment(id, req_data)
+        return jsonify({
+            'status': '200',
+            'id': id
+        })
+    else:
+        return jsonify({
+            'status': '400',
+            'res': 'failure',
+            'error': 'classroom data not loaded'
         })
     
 @app.route("/classes/<id>", methods=['DELETE'])
@@ -211,6 +310,56 @@ def delete_classrooms(id):
             'res': 'failure',
             'error': 'Classroom data not loaded'
         })
+
+@app.route("/classrooms/<id>", methods=['GET'])
+def get_classroom(id):
+    if hasattr(input_controller, "df_salon") and input_controller.classroom_exists(id):
+        result= input_controller.get_classroom(int(id))
+        return result
+    else:
+        return jsonify({
+            'status': '400',
+            'res': 'failure',
+            'error': 'classroom data not loaded'
+        })
+    
+@app.route("/classrooms", methods=['POST'])
+def post_classrooms():
+    req_data = request.get_json()
+    if 'name' in req_data\
+    and 'capacity' in req_data and 'max_capacity' in req_data:
+        id = db.insertRoom(req_data)
+        if hasattr(input_controller, "df_salon"):
+            input_controller.insert_classroom(id,req_data)
+        return jsonify({
+            'status': '200',
+            'id': id
+        })
+    else:
+        return jsonify({
+            'status': '400',
+            'res': 'failure',
+            'error': 'classroom data not loaded'
+        })
+    
+@app.route("/classrooms/schedule", methods=['POST'])
+def post_classrooms_schedule():
+    req_data = request.get_json()
+    if 'start' in req_data and 'id' in req_data\
+    and 'end' in req_data:
+        db.insertClassroomSchedule(req_data)
+        if hasattr(input_controller, "df_disp_salon"):
+            input_controller.insert_class_schedule(req_data)
+        return jsonify({
+            'status': '200',
+            'id': req_data['id']
+        })
+    else:
+        return jsonify({
+            'status': '400',
+            'res': 'failure',
+            'error': 'teachers schedule data not loaded'
+        })
     
 @app.route("/load_info", methods=['GET'])
 def get_load_info():
@@ -218,7 +367,6 @@ def get_load_info():
         if(input_controller.changed):
             def long_running_task(**kwargs):
                 print("loading")
-                scheduler = Scheduler()
                 scheduler.load_input_controller(input_controller)
                 input_controller.changed=False
             thread = threading.Thread(target=long_running_task)
@@ -241,5 +389,26 @@ def get_image(id):
 def get_history():
     
     return json.dumps(db.getSimHistory())
+
+@app.route('/load_by_db', methods=['GET'])
+def get_load_db():
+    if(input_controller.load_data_db()):
+        def long_running_task(**kwargs):
+            scheduler.load_input_controller(input_controller)
+        thread = threading.Thread(target=long_running_task)
+        thread.start()
+        return jsonify({
+            'status': '202',
+            'message': 'Accepted'
+        })
+        
+    else:
+        return jsonify({
+            'status': '400',
+            'res': 'failure',
+            'error': 'Could not load data from database'
+        })
+    
+
 
         

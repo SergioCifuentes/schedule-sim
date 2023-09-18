@@ -221,6 +221,7 @@ class Scheduler:
 
     def solve(self, solver_name, options=None, solver_path=None, local=True):
         print("Starting solver")
+
         pyutilib.subprocess.GlobalData.DEFINE_SIGNAL_HANDLERS_DEFAULT = False
         if solver_path is not None:
             solver = pe.SolverFactory(solver_name, executable=solver_path)
@@ -257,6 +258,7 @@ class Scheduler:
 
         self.classes_missed = list(set(all_classes).difference(self.classes_assigned))
         self.is_solved=True
+        print(results)
         print("Finish solver")
         # print("Number of classes assigned = {} out of {}:".format(len(self.classes_assigned), len(all_classes)))
         # print("Classes assigned: ", self.classes_assigned)

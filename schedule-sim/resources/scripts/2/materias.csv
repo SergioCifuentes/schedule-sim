@@ -3,7 +3,7 @@ id,nombre,carrera,semestre,obli,no_periodos
 17,"Social Humanista 1","Comun",1,false,1
 216,"Quimica 1","Comun",1,true,1
 170,"Matematica Basica 2","Comun",2,true,2
-5,"Tecnicas De Estudio Y De Investigacion","Comun",2,true,1
+5,"Tecnicas De Estudio","Comun",2,true,1
 147,"Fisica Basica","Comun",2,true,1
 107,"Matematica Intermedia1","Comun",3,true,2
 150,"Fisica 1","Comun",3,true,1

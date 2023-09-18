@@ -58,11 +58,32 @@ class DB:
         connection = self.engine.raw_connection()
         cursor = connection.cursor()
         cursor.execute(f'''INSERT INTO profesor(nombre, carrera) VALUES( \'%s\', \'%s\')'''%(data['name'], data['career']))
+        
         cursor.execute(f'''SELECT MAX(id) FROM profesor''')
         connection.commit()
-        connection.close()
+        
         result=cursor.fetchone()
+        cursor.execute(f'''INSERT INTO disp_profesor(id_profesor, inicio, fin) VALUES( %s,\'12:00\',\'13:00\' )'''%(result[0]))
+        connection.commit()
+        connection.close()
         return result[0]
+    
+    def insertTeacherSchedule(self, data):
+        connection = self.engine.raw_connection()
+        cursor = connection.cursor()
+        cursor.execute(f'''INSERT INTO disp_profesor(id_profesor, inicio, fin) VALUES( %s,\'%s\',\'%s\' )'''
+                       %(data['id'],data['start'],data['end']))
+        connection.commit()
+        connection.close()
+
+    def insertTeacherClass(self, data):
+        connection = self.engine.raw_connection()
+        cursor = connection.cursor()
+        cursor.execute(f'''INSERT INTO prof_materia(id_profesor, id_curso, fijo) VALUES( %s,\'%s\',\'%s\' )'''
+                       %(data['id'],data['class_id'],data['mandatory']))
+        connection.commit()
+        connection.close()
+        
 
     
     def deleteTeacher(self, id):
@@ -83,12 +104,59 @@ class DB:
         
         connection.commit()
 
+    def insertClass(self, data):
+        connection = self.engine.raw_connection()
+        cursor = connection.cursor()
+        id = data['id']
+        cursor.execute(f'''INSERT INTO materia(id, nombre, carrera, semestre, obli, no_periodos) VALUES( \'%s\',\'%s\', \'%s\', \'%s\',\'%s\',\'%s\')'''
+                       %(str(id),data['name'], data['career'],data['semester'], data['mandatory'], data['periods'] ))
+        
+        connection.commit()
+        connection.close()
+        return id
+    
+    def insertClassAsignment(self, data):
+        connection = self.engine.raw_connection()
+        cursor = connection.cursor()
+        cursor.execute(f'''INSERT INTO asignacion(id_materia, sec, numero_estudiantes) VALUES( \'%s\',\'%s\', \'%s\')'''
+                       %(data['id'],data['section'],data['students'] ))
+        cursor.execute(f'''SELECT MAX(id) FROM asignacion''')
+        result=cursor.fetchone()
+        connection.commit()
+        connection.close()
+        return result[0]
+
     def deleteClassroom(self, id):
         connection = self.engine.raw_connection()
         cursor = connection.cursor()
         cursor.execute(f'''DELETE FROM salon WHERE id = ('{id}');''')
         cursor.execute(f'''DELETE FROM disp_salon WHERE id_salon = ('{id}');''')
         connection.commit()
+
+
+    def insertRoom(self, data):
+        connection = self.engine.raw_connection()
+        cursor = connection.cursor()
+ 
+        cursor.execute(f'''INSERT INTO salon(nombre, capacidad_comoda, capacidad_maxima) VALUES( \'%s\', \'%s\', \'%s\')'''
+                       %(data['name'], data['capacity'], data['max_capacity'] ))
+        
+        cursor.execute(f'''SELECT MAX(id) FROM salon''')
+        connection.commit()
+        
+        result=cursor.fetchone()
+        cursor.execute(f'''INSERT INTO disp_salon(id_salon, inicio, fin) VALUES( %s,\'12:00\',\'13:00\' )'''%(result[0]))
+        connection.commit()
+        connection.close()
+        return result[0]
+
+    def insertClassroomSchedule(self, data):
+        connection = self.engine.raw_connection()
+        cursor = connection.cursor()
+        cursor.execute(f'''INSERT INTO disp_salon(id_salon, inicio, fin) VALUES( %s,\'%s\',\'%s\' )'''
+                       %(data['id'],data['start'],data['end']))
+        connection.commit()
+        connection.close()
 
     def getSimHistory(self):
         array=[]
