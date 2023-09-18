@@ -148,6 +148,17 @@ class Scheduler:
         def objective_function(model):
             return sum([model.PERIOD_ASSIGNED[clasS, period] for clasS in model.CLASSES for period in model.PERIODS])
         model.OBJECTIVE = pe.Objective(rule=objective_function, sense=pe.maximize)
+
+        # def objective_function2(model):
+        #     max=0
+        #     min=-1
+        #     for teacher in model.TEACHERS:
+        #         aux = sum([model.TEACHER_ASSIGNED[clasS, period,teacher] for clasS in model.CLASSES for period in model.PERIODS])
+        #         if(max<aux): max=aux
+        #         if(min==-1):min=aux
+        #         elif(min<aux): min=aux
+        #     return max-min
+        # model.OBJECTIVE2 = pe.Objective(rule=objective_function2, sense=pe.minimize)
         
         #Constraints
 
@@ -236,6 +247,7 @@ class Scheduler:
         if local:
             solver_results = solver.solve(self.model, tee=True)
         else:
+
             solver_manager = pe.SolverManagerFactory("neos")
             solver_results = solver_manager.solve(self.model, opt=solver)
         results=[]
@@ -281,7 +293,7 @@ if __name__ == "__main__":
     cbc_name = "cbc"
     ipopt_name = "ipopt"
     input_controller = InputController()
-    path="C:\\Users\\sergi\\Documents\\Coding\\Python\\schedule-sim\\schedule-sim\\resources\\scripts\\3\\"
+    path="C:\\Users\\sergi\\Documents\\Coding\\Python\\schedule-sim\\schedule-sim\\resources\\scripts\\"
     input_controller.load_data(path)
     
     options = {"seconds": 200}

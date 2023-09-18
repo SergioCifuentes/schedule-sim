@@ -1,0 +1,24 @@
+id,nombre,carrera,semestre,obli,no_periodos
+169,"Matematica Basica 1","Comun",1,true,2
+17,"Social Humanista 1","Comun",1,false,1
+216,"Quimica 1","Comun",1,false,1
+170,"Matematica Basica 2","Comun",2,false,2
+5,"Tecnicas De Estudio","Comun",2,false,1
+147,"Fisica Basica","Comun",2,true,1
+107,"Matematica Intermedia1","Comun",3,true,2
+150,"Fisica 1","Comun",3,true,1
+112,"Matematica Intermedia 2","Comun",4,false,1
+114,"Matematica Intermedia 3","Comun",4,false,1
+10,"Logica","Comun",4,false,1
+152,"Fisica 2","Comun",4,false,1
+18,"Filosofia De La Ciencia","Comun",5,true,1
+686,"Hidraulica","Civil",6,false,1
+749,"Hidrologia","Civil",7,true,1
+940,"Vias Terrestres 1","Civil",7,false,1
+799,"Cimentaciones 1","Civil",8,false,1
+932,"Diseño Estructural","Civil",8,false,1
+798,"Ingenieria Sanitaria 2","Civil",8,false,1
+791,"Ingenieria Sanitaria 1","Civil",8,false,1
+963,"Concreto Armado 2","Civil",8,false,1
+1071,"Puentes","Civil",9,true,1
+912,"Planeamiento","Civil",9,false,2

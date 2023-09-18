@@ -22,9 +22,11 @@ class Drawer:
             time.append(value.strftime('%H:%M'))
         roomId=[]
         roomName=[]
+        i=1
         for key,value in self.rooms.items():
-            roomId.append(key)
+            roomId.append(i)
             roomName.append(value)
+            i=i+1
         df = self.results
         classes = sorted(list(df['Class'].unique()))
         rooms = sorted(list(df['Room'].unique()))
@@ -50,8 +52,8 @@ class Drawer:
                         # xf = (xs + relativedelta(minutes=(self.numperiods[c]*constant.TIEMPO_PERIODO))).time()
                         # xs=xs.time()
                         xf = xs +self.numperiods[c]
-                        ax.plot([s]* 2,[xs, xf] , c=colors[self._get_color(idC)], **bar_style)
-                        ax.text(s,(xs + xf) / 2, str(idC) +"\n"+className+"\n\'"+sec+"\'\n"+ name, **text_style)
+                        ax.plot([s_ix]* 2,[xs, xf] , c=colors[self._get_color(idC)], **bar_style)
+                        ax.text(s_ix,(xs + xf) / 2, str(idC) +"\n"+className+"\n\'"+sec+"\'\n"+ name, **text_style)
 
         ax.set_title('Horario')
         ax.set_xlabel('Rooms')

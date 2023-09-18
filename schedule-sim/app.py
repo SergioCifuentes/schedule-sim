@@ -127,7 +127,6 @@ def post_teachers():
 @app.route("/teachers/schedule", methods=['POST'])
 def post_teachers_schedule():
     req_data = request.get_json()
-    print(req_data)
     if 'start' in req_data and 'id' in req_data\
     and 'end' in req_data:
         id = db.insertTeacherSchedule(req_data)
@@ -147,7 +146,6 @@ def post_teachers_schedule():
 @app.route("/teachers/class", methods=['POST'])
 def post_teachers_class():
     req_data = request.get_json()
-    print(req_data)
     if 'class_id' in req_data and 'id' in req_data\
     and 'mandatory' in req_data:
         id = db.insertTeacherClass(req_data)
@@ -366,7 +364,6 @@ def get_load_info():
     if hasattr(input_controller, "df_profesores"):
         if(input_controller.changed):
             def long_running_task(**kwargs):
-                print("loading")
                 scheduler.load_input_controller(input_controller)
                 input_controller.changed=False
             thread = threading.Thread(target=long_running_task)

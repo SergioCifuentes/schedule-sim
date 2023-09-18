@@ -167,5 +167,6 @@ class DB:
         for result in results:
             dictJ = result[2]
             array.append({"id":result[0], "date":str(result[1]),
-                          "assigned":dictJ['assigned'], "notAssigned":dictJ['notAssigned']})
+                          "assigned":dictJ['assigned'], "notAssigned":dictJ['notAssigned'],
+                          "difference":dictJ['difference'],"maxPeriodsForTeacher":dictJ['maxPeriodsForTeacher'] })
         return array

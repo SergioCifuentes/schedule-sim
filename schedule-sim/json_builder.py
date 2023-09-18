@@ -6,6 +6,10 @@ def convert_to_Json(df_results, df_asignacion, df_materia, df_profesor,
     classes=[]
     dict['assigned']=assigned
     dict['notAssigned']=notAssigned
+    maxmin=_get_max(df_results)
+    dict['maxPeriodsForTeacher']=maxmin[0]
+    dict['difference']=maxmin[0]-maxmin[1]
+    
     for index, row in df_results.iterrows():
         new_class={}
         id=row['Class']
@@ -39,3 +43,19 @@ def _get_class(df_materia, code):
 
 def _get_asignment(df_asignacion, id):
     return df_asignacion[df_asignacion["id"] == id]
+
+def _get_max(df_results):
+    dict={}
+    for index, row in df_results.iterrows():
+        if('Teacher'in row):
+            id=row['Teacher']
+            if(id in dict):
+                dict[id]=dict[id]+1
+            else:
+                dict[id]=1
+    maxNum=max(dict.values())
+    minNum=min(dict.values())
+    return[maxNum,minNum]
+    
+
+
