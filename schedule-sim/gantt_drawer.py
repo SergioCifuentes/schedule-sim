@@ -76,7 +76,7 @@ class Drawer:
         wspace=0.185)
         plt.tight_layout()
         plt.rcParams['savefig.dpi']=225
-        plt.savefig("C:\\Users\\sergi\\Documents\\Coding\\Python\\schedule-sim\\docs\\Schedule"+str(id))
+        plt.savefig("C:\\Users\\sergi\\Documents\\Coding\\Python\\schedule-sim\\docs\\results\\Schedule"+str(id))
         #plt.show()
     def _get_class_by_assignment(self, id):
         return self.df_asignacion[self.df_asignacion["id"] == id]["id_materia"].item()

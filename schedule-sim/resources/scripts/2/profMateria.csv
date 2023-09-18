@@ -1,7 +1,6 @@
 id_profesor,id_curso,fijo
 5,169,true
 5,170,false
-5,150,true
 5,152,false
 5,147,false
 5,686,true
@@ -15,8 +14,6 @@ id_profesor,id_curso,fijo
 6,1071,true
 6,169,false
 7,18,false
-7,791,true
-7,169,false
 8,216,true
 8,749,false
 9,18,false

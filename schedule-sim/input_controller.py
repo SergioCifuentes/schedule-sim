@@ -25,7 +25,6 @@ class InputController:
         except :
             return False
         
-
     def load_data(self, path=constant.PATH):
         self.engine = create_engine(os.environ['DATABASE_URL'])
         try:
@@ -34,31 +33,26 @@ class InputController:
         except FileNotFoundError:
             print("Asignacion data not found.")
             return False
-
         try:
             self.df_disp_prof = pd.read_csv(path+constant.DISP_PROF)
         except FileNotFoundError:
             print("Disponibilidad Profesor data not found")
-            return False
-        
+            return False  
         try:
             self.df_disp_salon = pd.read_csv(path+constant.DISP_SALON)
         except FileNotFoundError:
             print("Disponibilidad Salon data not found")
             return False
-
         try:
             self.df_materias = pd.read_csv(path+constant.MATERIAS)
         except FileNotFoundError:
             print("Materias data not found")
             return False
-
         try:
             self.df_profesores = pd.read_csv(path+constant.PROFESORES)
         except FileNotFoundError:
             print("Profesores data not found")
             return False
-        
         try:
             self.df_prof_materia = pd.read_csv(path+constant.PROF_MATERIA)
         except FileNotFoundError:

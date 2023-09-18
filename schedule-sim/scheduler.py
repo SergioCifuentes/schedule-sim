@@ -45,7 +45,7 @@ class Scheduler:
         df =self.df_asignacion.loc[self.df_asignacion['id'] == id]
         return df['numero_estudiantes'].item()
     
-    def _get_max_period_num(self):
+    def _get_max_period_num(self):  
         max =self.df_materias.max()['no_periodos']
         return max
 
@@ -258,13 +258,12 @@ class Scheduler:
 
         self.classes_missed = list(set(all_classes).difference(self.classes_assigned))
         self.is_solved=True
-        print(results)
         print("Finish solver")
-        # print("Number of classes assigned = {} out of {}:".format(len(self.classes_assigned), len(all_classes)))
-        # print("Classes assigned: ", self.classes_assigned)
-        # print("Number of Classes missed = {} out of {}:".format(len(self.classes_missed ), len(all_classes)))
-        # print("Classes missed: ", self.classes_missed )
-        # print("Number of constraints = {}".format(solver_results["Problem"].__getitem__(0)["Number of constraints"]))
+        print("Number of classes assigned = {} out of {}:".format(len(self.classes_assigned), len(all_classes)))
+        print("Classes assigned: ", self.classes_assigned)
+        print("Number of Classes missed = {} out of {}:".format(len(self.classes_missed ), len(all_classes)))
+        print("Classes missed: ", self.classes_missed )
+        print("Number of constraints = {}".format(solver_results["Problem"].__getitem__(0)["Number of constraints"]))
         
     
     def draw(self, id):
@@ -282,10 +281,10 @@ if __name__ == "__main__":
     cbc_name = "cbc"
     ipopt_name = "ipopt"
     input_controller = InputController()
-    path="C:\\Users\\sergi\\Documents\\Coding\\Python\\schedule-sim\\schedule-sim\\resources\\scripts\\2\\"
+    path="C:\\Users\\sergi\\Documents\\Coding\\Python\\schedule-sim\\schedule-sim\\resources\\scripts\\3\\"
     input_controller.load_data(path)
     
-    options = {"seconds": 100}
+    options = {"seconds": 200}
     scheduler = Scheduler()
     scheduler.load_input_controller(input_controller)
     scheduler.solve(solver_name=cbc_name, solver_path=cbc_path, options=options)

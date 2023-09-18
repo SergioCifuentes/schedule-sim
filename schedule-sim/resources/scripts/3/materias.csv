@@ -1,0 +1,43 @@
+id,nombre,carrera,semestre,obli,no_periodos
+169,"Matematica Basica 1","Comun",1,true,2
+17,"Social Humanista 1","Comun",1,false,1
+216,"Quimica 1","Comun",1,false,1
+170,"Matematica Basica 2","Comun",2,false,2
+29,"Social Humanista 2","Comun",2,false,1
+5,"Tecnicas De Estudio","Comun",2,false,1
+147,"Fisica Basica","Comun",2,false,1
+107,"Matematica Intermedia1","Comun",3,false,2
+150,"Fisica 1","Comun",3,false,1
+112,"Matematica Intermedia 2","Comun",4,false,1
+114,"Matematica Intermedia 3","Comun",4,true,1
+10,"Logica","Comun",4,false,1
+152,"Fisica 2","Comun",4,true,1
+118,"Matematica Aplicada 1","Comun",5,false,1
+116,"Matematica Aplicada 3","Comun",5,true,1
+18,"Filosofia De La Ciencia","Comun",5,false,1 
+2796,"IPC1","Sistemas",3,false,1
+2798,"Lenguajes De Programacion","Sistemas",3,false,1
+2799,"Matematica de Computo 2","Sistemas",3,true,1
+2800,"IPC2","Sistemas",4,false,1
+2812,"Manejo E Implementacion de Archivos","Sistemas",6,false,1
+2810,"Organizacion De Compiladores 2","Sistemas",6,false,1
+2811,"Arquitectura De Compiladores1","Sistemas",6,true,1
+2820,"Redes De Computadoras 2","Sistemas",8,false,1
+2823,"Seminario De Sisteams 2","Sistemas",8,false,1
+2819,"Sistemas Operativos 2","Sistemas",8,true,1
+2835,"Modelacion y Simulacion 2","Sistemas",10,false,1
+746,"Topografia 1","Civil",4,true,1
+671,"Mecanica De Fluidos","Civil",5,false,1
+677,"Resistencia De Materiales 2","Civil",6,false,2
+748,"Mecanica De Suelos","Civil",6,false,1
+679,"Materiales De Construccion","Civil",6,true,1
+686,"Hidraulica","Civil",6,false,1
+749,"Hidrologia","Civil",7,false,1
+940,"Vias Terrestres 1","Civil",7,false,1
+799,"Cimentaciones 1","Civil",8,true,1
+932,"Diseño Estructural","Civil",8,false,1
+798,"Ingenieria Sanitaria 2","Civil",8,false,1
+791,"Ingenieria Sanitaria 1","Civil",8,true,1
+963,"Concreto Armado 2","Civil",8,false,1
+1071,"Puentes","Civil",9,false,1
+912,"Planeamiento","Civil",9,true,2

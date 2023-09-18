@@ -381,7 +381,7 @@ def get_load_info():
     
 @app.route('/get_image/<id>', methods=['GET'])
 def get_image(id):
-    filename='../docs/Schedule'+id+'.png'
+    filename='../docs/results/Schedule'+id+'.png'
 
     return send_file(filename, mimetype='image/gif')
 

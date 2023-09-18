@@ -27,7 +27,7 @@ dependencies:
   - numpy=1.18.1=py38h93ca92e_0
   - numpy-base=1.18.1=py38hc3f5095_1
   - openssl=1.1.1g=he774522_0
-  - pandas=1.0.3=py38h47e9c7a_0
+  - pandas=2.0.3=py38h47e9c7a_0
   - pip=20.0.2=py38_3
   - ply=3.11=py_1
   - pyomo=5.6.9=py38h32f6830_2

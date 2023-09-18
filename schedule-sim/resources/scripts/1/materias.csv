@@ -14,8 +14,7 @@ id,nombre,carrera,semestre,obli,no_periodos
 152,"Fisica 2","Comun",4,true,1
 118,"Matematica Aplicada 1","Comun",5,true,1
 116,"Matematica Aplicada 3","Comun",5,true,1
-18,"Filosofia De La Ciencia","Comun",5,true,1
-    
+18,"Filosofia De La Ciencia","Comun",5,true,1 
 2796,"IPC1","Sistemas",3,true,1
 2798,"Lenguajes De Programacion","Sistemas",3,true,1
 2799,"Matematica de Computo 2","Sistemas",3,true,1
@@ -27,12 +26,18 @@ id,nombre,carrera,semestre,obli,no_periodos
 2823,"Seminario De Sisteams 2","Sistemas",8,true,1
 2819,"Sistemas Operativos 2","Sistemas",8,true,1
 2835,"Modelacion y Simulacion 2","Sistemas",10,true,1
-
 746,"Topografia 1","Civil",4,true,1
 671,"Mecanica De Fluidos","Civil",5,true,1
 677,"Resistencia De Materiales 2","Civil",6,true,2
 748,"Mecanica De Suelos","Civil",6,true,1
 679,"Materiales De Construccion","Civil",6,true,1
-
-
-
+686,"Hidraulica","Civil",6,true,1
+749,"Hidrologia","Civil",7,true,1
+940,"Vias Terrestres 1","Civil",7,true,1
+799,"Cimentaciones 1","Civil",8,true,1
+932,"Diseño Estructural","Civil",8,true,1
+798,"Ingenieria Sanitaria 2","Civil",8,true,1
+791,"Ingenieria Sanitaria 1","Civil",8,true,1
+963,"Concreto Armado 2","Civil",8,true,1
+1071,"Puentes","Civil",9,true,1
+912,"Planeamiento","Civil",9,true,2
