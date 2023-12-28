@@ -9,11 +9,11 @@ To run the classroom programming simulation using Docker and a Conda image, foll
 ### Install Docker
 If you do not already have Docker installed on your system, you can download and install it by following the official installation guide for your operating system:
 
--[Windows](https://docs.docker.com/desktop/install/windows-install/)
+- [Windows](https://docs.docker.com/desktop/install/windows-install/)
 
--[Linux](https://docs.docker.com/desktop/install/linux-install/)
+- [Linux](https://docs.docker.com/desktop/install/linux-install/)
 
--[MacOS](https://docs.docker.com/desktop/install/mac-install/)
+- [MacOS](https://docs.docker.com/desktop/install/mac-install/)
 
 ### Clone Repository
 Clone the mock repository from the source code repository (e.g. GitHub) to your local machine:
