@@ -46,10 +46,13 @@ You can change configurations in **constant.py**, like minutes in a period and t
 Every rule for the linear programming algorithm can be found here **scheduler.py**
 
 ### Decision Variables
+
 **X_it**: Binary decision variable that is equal to 1 if class i is scheduled at time t; 0
 otherwise.
+
 **Y_itj**: Binary decision variable that is equal to 1 if class i is scheduled at time t
 assigned to teacher j; 0 otherwise.
+
 **Z_itf**: Binary decision variable that is equal to 1 if class i is scheduled at time t
 assigned to room f; 0 otherwise.
 
