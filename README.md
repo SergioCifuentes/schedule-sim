@@ -28,7 +28,7 @@ docker run -it --name your-container-name your-image-name
 ```
 And finally you will be able to access the application through localhost:5000.
 
-##Configuration
+## Configuration
 
 Uploading CSV files is essential to the functionality of the simulation. Here you will see
 all the files necessary to achieve a correct simulation.
@@ -42,7 +42,7 @@ You can change configurations in **constant.py**, like minutes in a period and t
 
 Every rule for the linear programming algorithm can be found here **scheduler.py**
 
-###Decision Variables
+### Decision Variables
 **X_it**: Binary decision variable that is equal to 1 if class i is scheduled at time t; 0
 otherwise.
 **Y_itj**: Binary decision variable that is equal to 1 if class i is scheduled at time t
@@ -50,7 +50,7 @@ assigned to teacher j; 0 otherwise.
 **Z_itf**: Binary decision variable that is equal to 1 if class i is scheduled at time t
 assigned to room f; 0 otherwise.
 
-###Objective function:
+### Objective function:
 The objective of the linear programming model is to maximize the assignment of courses and
 Minimize scheduling conflicts. We can declare the objective function as a variable that will be established by the user according to what they want to search for when performing the simulation The objective function is as follows:
 ```
