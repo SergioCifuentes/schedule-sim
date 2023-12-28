@@ -1,10 +1,11 @@
-# schedule-sim
+# Schedule Simulator
 
 Algorithm that provides solutions to class schedules based on teacher availability, size and classroom availability, fed from database scripts. Use of heuristic algorithms.
 
 ## Installation
 
 To run the classroom programming simulation using Docker and a Conda image, follow these step-by-step installation instructions:
+
 ### Install Docker
 If you do not already have Docker installed on your system, you can download and install it by following the official installation guide for your operating system:
 [Windows](https://docs.docker.com/desktop/install/windows-install/)
@@ -16,11 +17,13 @@ Clone the mock repository from the source code repository (e.g. GitHub) to your 
 ```
 git clone https://github.com/SergioCifuentes/schedule-sim
 ```
+
 ### Create Docker Image
 Navigate to the root directory of the cloned repository and build the Docker image using the Dockerfile provided. Replace your image name with the name of the image you want:
 ```
 cd your-simulation docker build -t your-image-name .
 ```
+
 ### Run Docker container
 Now that you have created the Docker image, you can run a Docker container from it. Replace `your-image-name` with a meaningful name for your container:
 ```
@@ -56,6 +59,7 @@ Minimize scheduling conflicts. We can declare the objective function as a variab
 ```
 Maximize: Σ(X_it ) for all i, t
 ```
+
 ## Documentation
 
 Documentation can be found in the `docs` directory.
