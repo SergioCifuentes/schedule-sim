@@ -60,8 +60,7 @@ assigned to teacher j; 0 otherwise.
 assigned to room f; 0 otherwise.
 
 ### Objective function:
-The objective of the linear programming model is to maximize the assignment of courses and
-Minimize scheduling conflicts. We can declare the objective function as a variable that will be established by the user according to what they want to search for when performing the simulation The objective function is as follows:
+The objective of the linear programming model is to maximize the assignment of courses and minimize scheduling conflicts. We can declare the objective function as a variable that will be established by the user according to what they want to search for when performing the simulation The objective function is as follows:
 ```
 Maximize: Σ(X_it ) for all i, t
 ```
